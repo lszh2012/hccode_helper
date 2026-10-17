@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            width: 320px;
+            padding: 20px;
+            font-family: system-ui, Arial, sans-serif;
+            background: #f8f9fa;
+            margin: 0;
+        }
+        h4 {
+            margin: 0 0 12px 0;
+            text-align: center;
+            color: #333;
+        }
+        .section {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #eee;
+        }
+        .section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 6px 0 8px 0;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+            font-size: 12px;
+            font-family: monospace;
+        }
+        textarea {
+            height: 60px;
+            resize: vertical;
+        }
+        button {
+            padding: 8px 16px;
+            background: #4F46E5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        button:hover {
+            background: #4338ca;
+        }
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+        .btn-row button {
+            flex: 1;
+            min-width: 60px;
+        }
+
+        /* ★ 三按钮专用：字小、内边距紧、不换行 */
+        .btn-row-3 {
+            gap: 6px;
+        }
+        .btn-row-3 button {
+            font-size: 11px;
+            padding: 6px 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .btn-danger {
+            background: #ef4444 !important;
+        }
+        .btn-danger:hover {
+            background: #dc2626 !important;
+        }
+        .btn-warning {
+            background: #f59e0b !important;
+        }
+        .btn-warning:hover {
+            background: #d97706 !important;
+        }
+
+        /* ★ 小标题 */
+        .sub-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 6px 0;
+            padding-left: 8px;
+            border-left: 3px solid #4F46E5;
+            line-height: 1.2;
+        }
+        .sub-title:first-child {
+            margin-top: 4px;
+        }
+
+        /* ★ msg 悬浮胶囊 */
+        #msg {
+            position: fixed;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-16px);
+            z-index: 99999;
+            padding: 8px 22px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.4;
+            white-space: nowrap;
+            max-width: calc(100% - 40px);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #16a34a;
+            background: rgba(240, 253, 244, 0.95);
+            border: 1px solid #bbf7d0;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+            backdrop-filter: blur(10px) saturate(160%);
+            -webkit-backdrop-filter: blur(10px) saturate(160%);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+        #msg.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        #msg.error {
+            color: #dc2626;
+            background: rgba(254, 242, 242, 0.95);
+            border-color: #fecaca;
+        }
+        #msg.warning {
+            color: #d97706;
+            background: rgba(255, 251, 235, 0.95);
+            border-color: #fde68a;
+        }
+
+        .hint {
+            font-size: 11px;
+            color: #888;
+            text-align: center;
+            margin-top: 4px;
+        }
+        .hidden-list {
+            margin-top: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .hidden-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            padding: 6px 8px;
+            border-radius: 4px;
+            border: 1px solid #eee;
+            margin-bottom: 4px;
+            font-size: 12px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        .hidden-item .left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 0;
+        }
+        .hidden-item .left input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .hidden-item .left .selector-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .hidden-item .remove-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 2px 8px;
+            cursor: pointer;
+            font-size: 12px;
+            flex-shrink: 0;
+            margin-left: 8px;
+        }
+        .hidden-item .remove-btn:hover {
+            background: #dc2626;
+        }
+
+        .advanced-toggle {
+            cursor: pointer;
+            color: #4F46E5;
+            font-size: 13px;
+            font-weight: bold;
+            margin-top: 8px;
+            display: inline-block;
+            user-select: none;
+        }
+        .advanced-toggle:hover {
+            text-decoration: underline;
+        }
+        .advanced-content {
+            display: none;
+            margin-top: 8px;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #eef0f3;
+        }
+        .advanced-content.open {
+            display: block;
+        }
+
+        .toolbar-row {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .toolbar-row button {
+            flex: 1;
+            font-size: 12px;
+            padding: 6px 8px;
+        }
+        .import-area {
+            margin-top: 8px;
+        }
+        .import-area textarea {
+            height: 50px;
+        }
+
+        .tip-box {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #0369a1;
+            line-height: 1.6;
+        }
+        .tip-box code {
+            background: #e0f2fe;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #0c4a6e;
+        }
+        .tip-box .tip-title {
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        .tip-box .tip-sub {
+            color: #64748b;
+        }
+
+         .footer-info {
+            text-align: center;
+            padding-top: 12px;
+            margin-top: 8px;
+            font-size: 11px;
+            color: #aaa;
+        }
+        .footer-info .footer-line {
+            line-height: 1.6;
+        }
+        .footer-info a {
+            color: #aaa;
+            text-decoration: none;
+        }
+        .footer-info a:hover {
+            color: #666;
+        }
+        .footer-disclaimer {
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px dashed #e5e7eb;
+            font-size: 10px;
+            color: #bbb;
+            line-height: 1.5;
+        }
+
+        .app-title {
+            text-align: center;
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #4F46E5;
+        }
+        .app-title .main {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .app-title .version {
+            font-size: 11px;
+            color: #999;
+            margin-left: 8px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 22px;
+            flex-shrink: 0;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 22px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #4F46E5;
+        }
+        input:checked + .slider:before {
+            transform: translateX(18px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 悬浮提示 ===== -->
+    <div id="msg"></div>
+
+    <!-- ===== 标题 ===== -->
+    <div class="app-title">
+        <span class="main">🛠️ 鸿川刷题助手</span>
+        <span class="version">v1.3</span>
+    </div>
+
+     <!-- ===== 背景图设置 ===== -->
+    <div class="section">
+        <h4>🖼️ 自定义背景图</h4>
+        <div style="display:flex; gap:6px;">
+            <input type="text" id="bgInput" placeholder="粘贴图片网址，留空恢复默认" style="flex:1; margin:6px 0;" />
+            <button id="clearBgBtn" title="清空并恢复默认背景" style="background:#FFCCCB; flex-shrink:0; padding:8px 12px; margin:6px 0;">🗑️</button>
+        </div>
+
+        <div class="tip-box">
+            <div style="display:flex; align-items:flex-start; gap:8px;">
+                <span style="font-size:16px;">💡</span>
+                <div>
+                    <div class="tip-title">推荐使用图床直链</div>
+                    <div>如 <code>https://pic1.imgdb.cn/xxx.jpg</code></div>
+                    <div class="tip-sub" style="margin-top:4px;">
+                        ⚠️ 不要直接复制百度/谷歌图片搜索结果链接
+                    </div>
+                    <div class="tip-sub">
+                        ✅ 正确操作：在图片上右键 → 在新标签页中打开 → 复制地址栏中的真实URL
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button id="saveBgBtn" style="margin-top:8px; width:100%;">💾 保存背景</button>
+    </div>
+
+    <!-- ===== 毛玻璃开关 ===== -->
+    <div class="section">
+        <h4>🪟 毛玻璃 UI（beta）</h4>
+        <label style="display:flex; align-items:center; justify-content:space-between; font-size:14px; color:#333; cursor:pointer;">
+            <span>启用毛玻璃效果（beta）</span>
+            <div class="switch">
+                <input type="checkbox" id="glassToggle" checked>
+                <span class="slider"></span>
+            </div>
+        </label>
+        <div class="hint">卡片、表格、弹窗变玻璃质感。部分界面可能出现文字显示不清晰等问题，以后的版本会更新迭代</div>
+    </div>
+
+    <!-- ===== 隐藏卡片开关 ===== -->
+    <div class="section">
+        <h4>🔧 隐藏卡片开关</h4>
+        <div id="hiddenListContainer" class="hidden-list"></div>
+
+        <div class="toolbar-row">
+            <button id="exportBtn" style="background:#10b981;">📋 导出</button>
+            <button id="importBtn" style="background:#8b5cf6;">📥 导入</button>
+            <button id="resetBtn" style="background:#f59e0b;">🔄 复原</button>
+        </div>
+
+        <div class="import-area">
+            <textarea id="importInput" placeholder="在此粘贴导出的规则文本..."></textarea>
+        </div>
+
+        <div style="text-align:center;margin-top:8px;">
+            <span class="advanced-toggle" id="advancedToggle">⚙️ 高级设置 ▼</span>
+        </div>
+
+        <!-- ===== 高级设置内容 ===== -->
+        <div class="advanced-content" id="advancedContent">
+
+            <!-- ★ 小标题：隐藏卡片操作 -->
+            <div class="sub-title">🔧 隐藏卡片操作</div>
+            <input type="text" id="selectorInput" placeholder="手动输入 CSS 选择器" />
+            <div class="btn-row btn-row-3">
+                <button id="addSelectorBtn">➕ 手动添加</button>
+                <button id="pickModeBtn" class="btn-warning">🎯 点选隐藏</button>
+                <button id="clearAllBtn" class="btn-danger">🗑️ 全部清除</button>
+            </div>
+            <div class="hint" style="margin-top:6px;">点选模式：点击页面卡片即可精确隐藏</div>
+
+            <!-- 以后新增的高级功能块，直接照抄上面这个 sub-title + 内容的格式即可 -->
+
+        </div>
+    </div>
+
+    <!-- ===== 💾 设置备份 ===== -->
+    <div class="section">
+        <h4>💾 设置备份</h4>
+        <div class="hint" style="text-align:left; margin-bottom:8px;">
+            导出全部设置（背景图、毛玻璃、隐藏卡片、AI按钮位置），换设备时一键恢复
+        </div>
+        <div class="toolbar-row">
+            <button id="exportAllBtn" style="background:#10b981;">📤 导出全部</button>
+            <button id="importAllBtn" style="background:#8b5cf6;">📥 导入全部</button>
+        </div>
+        <textarea id="backupInput" placeholder="在此粘贴备份数据..." style="margin-top:8px; height:50px;"></textarea>
+    </div>
+
+    <!-- ===== 底部信息 ===== -->
+    <!-- ===== 底部信息 ===== -->
+    <div class="footer-info">
+        <div class="footer-line">
+            <span>👨‍💻 <a href="https://hccode-helper.rth1.xyz/">Dshangzihao</a></span>
+            <span style="margin:0 6px;">•</span>
+            <span>💡 反馈欢迎留言</span>
+        </div>
+        <div class="footer-disclaimer">
+            ⚠️ 非官方社区工具，与鸿川信奥平台无关，无商业行为
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>
